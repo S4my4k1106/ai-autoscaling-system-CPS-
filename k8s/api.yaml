@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscaling-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autoscaling-api
+  template:
+    metadata:
+      labels:
+        app: autoscaling-api
+    spec:
+      containers:
+        - name: api
+          image: docker.io/library/autoscaling:v1
+          imagePullPolicy: IfNotPresent
+          workingDir: /app/api
+          command:
+            ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: "host.docker.internal"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "autoscaling"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: autoscaling-api-service
+spec:
+  selector:
+    app: autoscaling-api
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+      nodePort: 30800
+  type: NodePort

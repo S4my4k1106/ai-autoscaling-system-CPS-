@@ -1,8 +1,10 @@
 import pandas as pd
 import requests
 import time
+import os
 from datetime import datetime
 
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 df = pd.read_csv("data/IoT_Indoor_Air_Quality_Dataset.csv")
 df = df.fillna(0)  # add this line
@@ -27,11 +29,11 @@ for index, row in df.iterrows():
     }
 
     try:
-        response = requests.post("http://52.66.250.69:8000/ingest", json=payload)
+        response = requests.post(f"{API_URL}/ingest", json=payload)
         print(f"[{datetime.now().strftime('%H:%M:%S')}] Sent sensor_{index % 50 + 1:02d} → Status: {response.status_code}")
     except Exception as e:
         print(f"[{datetime.now().strftime('%H:%M:%S')}] FastAPI not running yet: {e}")
 
     time.sleep(0.5)  # Adjust the sleep time as needed to control the data sending rate
 
-print("Dataset finished! Restarting...")
+print("Dataset finished! Restarting...") 	

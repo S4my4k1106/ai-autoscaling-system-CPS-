@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+data/*.csv
+!data/IoT_Indoor_Air_Quality_Dataset.csv
+node_modules/
+frontend/node_modules/
+!ml/
+!ml/model_cpu.pkl
+!ml/model_memory.pkl

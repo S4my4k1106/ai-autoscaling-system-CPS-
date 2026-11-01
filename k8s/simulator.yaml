@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscaling-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autoscaling-simulator
+  template:
+    metadata:
+      labels:
+        app: autoscaling-simulator
+    spec:
+      containers:
+        - name: simulator
+          image: docker.io/library/autoscaling:v1
+         imagePullPolicy: IfNotPresent
+          workingDir: /app
+          command: ["python", "simulator/simulator.py"]
+          env:
+            - name: API_URL
+              value: "http://autoscaling-api-service:8000"

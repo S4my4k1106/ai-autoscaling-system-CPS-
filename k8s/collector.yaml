@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscaling-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autoscaling-collector
+  template:
+    metadata:
+      labels:
+        app: autoscaling-collector
+    spec:
+      containers:
+        - name: collector
+         image: docker.io/library/autoscaling:v1
+          imagePullPolicy: IfNotPresent
+          workingDir: /app
+          command: ["python", "collector/collector.py"]
+          env:
+            - name: DB_HOST
+              value: "host.docker.internal"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "autoscaling"
+            - name: DB_USER
+              value: "postgres"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+            - name: API_URL
+              value: "http://autoscaling-api-service:8000"

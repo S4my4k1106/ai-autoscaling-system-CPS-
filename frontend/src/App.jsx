@@ -5,8 +5,8 @@ import {
 } from "recharts";
 import axios from "axios";
 
-const API = "http://52.66.250.69:8000";
-const WS_URL = "ws://52.66.250.69:8000/ws";
+const API = "http://localhost:8000";
+const WS_URL = "ws://127.0.0.1:8000/ws";
 
 const colors = {
   bg: "#f8fafc",
@@ -29,13 +29,25 @@ export default function App() {
   const [connected, setConnected] = useState(false);
   const ws = useRef(null);
 
-  const fetchAll = () => {
-    axios.get(`${API}/predictions`).then(res => setPredictions(res.data.predictions.slice(-20)));
-    axios.get(`${API}/dashboard-data`).then(res => setDashboardData(res.data));
-    axios.get(`${API}/alerts`).then(res => setAlerts(res.data.alerts.slice(-5)));
-    axios.get(`${API}/scaling-events`).then(res => setScalingEvents(res.data.scaling_events.slice(-5)));
-  };
+ const fetchAll = () => {
+  axios.get(`${API}/predictions`)
+    .then(res => setPredictions(res.data.predictions.slice(-20)));
 
+  axios.get(`${API}/dashboard-data`)
+    .then(res => {
+      setDashboardData(prev => ({
+        ...res.data,
+        latest_metrics: prev?.latest_metrics ?? res.data.latest_metrics,
+        latest_prediction: prev?.latest_prediction ?? res.data.latest_prediction
+      }));
+    });
+
+  axios.get(`${API}/alerts`)
+    .then(res => setAlerts(res.data.alerts.slice(-5)));
+
+  axios.get(`${API}/scaling-events`)
+    .then(res => setScalingEvents(res.data.scaling_events.slice(-5)));
+};
   useEffect(() => { fetchAll(); }, []);
   useEffect(() => {
     const interval = setInterval(fetchAll, 3000);

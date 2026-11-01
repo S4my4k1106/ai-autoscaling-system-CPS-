@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: autoscaling
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 9H1kw30ts6
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: autoscaling
+      DB_USER: postgres
+      DB_PASSWORD: 9H1kw30ts6
+    depends_on:
+      - db
+    volumes:
+      - ./ml:/app/ml
+      - ./data:/app/data
+
+  collector:
+    build: .
+    command: python /app/collector/collector.py
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: autoscaling
+      DB_USER: postgres
+      DB_PASSWORD: 9H1kw30ts6
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - api
+
+  simulator:
+    build: .
+    command: python /app/simulator/simulator.py
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autoscaling-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autoscaling-db
+  template:
+    metadata:
+      labels:
+        app: autoscaling-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          env:
+            - name: POSTGRES_DB
+              value: autoscaling
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: 9H1kw30ts6
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    app: autoscaling-db
+  ports:
+    - port: 5432
+      targetPort: 5432
